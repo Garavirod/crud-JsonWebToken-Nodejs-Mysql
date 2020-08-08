@@ -29,7 +29,7 @@ controllers.register = async(req, res) => {
                         let token = jwt.sign(user.dataValues, process.env.SECRET_KEY, {
                             expiresIn: 1440,
                         });
-                        res.json({ toke: token });
+                        res.json({ token: token });
                     })
                     .catch((err) => {
                         res.send("Error >:" + err);
@@ -51,7 +51,7 @@ controllers.login = async(req, res) => {
                 let token = jwt.sign(user.dataValues, process.env.SECRET_KEY, {
                     expiresIn: 1440,
                 });
-                res.json({ toke: token });
+                res.json({ token: token });
             } else {
                 res.send('User does not exist !')
             }
@@ -64,36 +64,57 @@ controllers.login = async(req, res) => {
 // PROFILE
 controllers.profile = async(req, res) => {
     var decoded = jwt.verify(req.headers['authorization'], process.env.SECRET_KEY);
-    User.findOne({
+    let issuccefully;
+    const profile = await User.findOne({
             where: { id: decoded.id }
         })
-        .then(user => {
-            if (user) {
-                res.json(user);
+        .then(userProfile => {
+            if (userProfile) {
+                // res.json(userProfile);
+                issuccefully = true;
+                return userProfile;
             } else {
+                issuccefully = false;
                 res.send("User does not exist!");
             }
         })
         .catch(err => {
             res.send("Error >: " + err)
         });
+
+    res.json({ success: issuccefully, data: profile });
 };
 
 
 // USERS LIST
 controllers.list = async(req, res) => {
-    User.findAll()
-        .then(user => {
+    const users = await User.findAll()
+        .then(users => {
             if (users) {
-                res.json(users);
+                return users;
             } else {
                 res.send("There are not users!");
             }
         })
         .catch(err => {
-            res.send("Error >: " + err)
+            res.send("Error >: " + err);
         });
+    res.json({ success: true, data: users });
 };
 
+
+// USER BY ID
+controllers.oneUser = async(req, res) => {
+    const userbyid = await User.findOne({
+            where: { id: req.params.id }
+        })
+        .then(user => {
+            return user;
+        })
+        .catch(err => {
+            res.send("Error >: " + err);
+        });
+    res.json({ success: true, data: userbyid });
+};
 
 module.exports = controllers;
