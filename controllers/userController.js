@@ -1,14 +1,13 @@
 const User = require("../models/User");
 const db = require("../config/db");
-const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const controllers = {};
 process.env.SECRET_KEY = "secret";
-db.sync(); // Migrate tables if not exist
+db.sync(); // Migrate tables if do not exist
 
 // REGISTER
-controllers.register = async(res, req) => {
+controllers.register = async(req, res) => {
     const today = new Date();
     const userData = {
         first_name: req.body.first_name,
@@ -45,7 +44,7 @@ controllers.register = async(res, req) => {
 };
 
 // LOGIN
-controllers.login = async(res, req) => {
+controllers.login = async(req, res) => {
     User.findOne({ where: { email: req.body.email } })
         .then(user => {
             if (bcrypt.compareSync(req.body.password, user.password)) {
@@ -63,8 +62,8 @@ controllers.login = async(res, req) => {
 };
 
 // PROFILE
-controllers.profile = async(res, req) => {
-    var decoded = jwt.verify(req.headers["authorization"], process.env.SECRET_KEY);
+controllers.profile = async(req, res) => {
+    var decoded = jwt.verify(req.headers['authorization'], process.env.SECRET_KEY);
     User.findOne({
             where: { id: decoded.id }
         })
@@ -73,6 +72,22 @@ controllers.profile = async(res, req) => {
                 res.json(user);
             } else {
                 res.send("User does not exist!");
+            }
+        })
+        .catch(err => {
+            res.send("Error >: " + err)
+        });
+};
+
+
+// USERS LIST
+controllers.list = async(req, res) => {
+    User.findAll()
+        .then(user => {
+            if (users) {
+                res.json(users);
+            } else {
+                res.send("There are not users!");
             }
         })
         .catch(err => {

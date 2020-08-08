@@ -8,12 +8,12 @@ app.use(morgan('tiny'));
 app.use(bodyParser.json());
 app.use(cors());
 app.use(
-    bodyParser.urlencoded({ extended: false })
+    bodyParser.urlencoded({ extended: true })
 );
 
 // Root
 app.get('/', (req, res) => {
-    res.send('Hello World 3!');
+    res.send('Hello World from root!');
 });
 
 
